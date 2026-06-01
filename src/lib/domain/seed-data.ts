@@ -1,0 +1,232 @@
+import type { Expense, ManualIncome, Trip } from "./types";
+
+export const demoTrips: Trip[] = [
+  {
+    id: "trip-0001",
+    date: "2026-01-16",
+    time: "08:30",
+    driverId: "kevin",
+    corporateClientId: "mi-chofer",
+    passenger: "Alessia Sanpietro - Mama Lorena Cornaglia",
+    origin: "Castores",
+    destination: "Centro comercial",
+    kilometers: 4,
+    waitValue: 0,
+    totalAmount: 7000,
+    chargeType: "PENDIENTE",
+    paymentMethod: "PENDING",
+    sharedTrip: false,
+    status: "COMPLETED",
+    paidAt: "2026-01-24",
+    paidMethod: "MERCADO_PAGO"
+  },
+  {
+    id: "trip-0002",
+    date: "2026-01-02",
+    time: "12:00",
+    driverId: "paul",
+    corporateClientId: "uber",
+    passenger: "UBER",
+    origin: "pasajero",
+    destination: "viaje urbano",
+    kilometers: 0,
+    waitValue: 0,
+    totalAmount: 6800,
+    chargeType: "COBRADO_EN_EL_MOMENTO",
+    paymentMethod: "BANCO_GALICIA_PAUL",
+    sharedTrip: false,
+    status: "COMPLETED"
+  },
+  {
+    id: "trip-0003",
+    date: "2026-01-05",
+    time: "10:15",
+    driverId: "paul",
+    corporateClientId: "hotel-wyndham",
+    passenger: "Huesped - Wyndham",
+    origin: "Hotel Wyndham",
+    destination: "Ezeiza",
+    kilometers: 44,
+    waitValue: 0,
+    totalAmount: 111574,
+    chargeType: "COBRADO_EN_EL_MOMENTO",
+    paymentMethod: "MERCADO_PAGO",
+    sharedTrip: false,
+    status: "COMPLETED"
+  },
+  {
+    id: "trip-0004",
+    date: "2026-01-05",
+    time: "15:45",
+    driverId: "paul",
+    corporateClientId: "mi-chofer",
+    passenger: "Pedro",
+    origin: "Ezeiza",
+    destination: "El Canton",
+    kilometers: 58,
+    waitValue: 0,
+    totalAmount: 100000,
+    chargeType: "COBRADO_EN_EL_MOMENTO",
+    paymentMethod: "CASH_MI_CHOFER",
+    sharedTrip: false,
+    status: "COMPLETED"
+  },
+  {
+    id: "trip-0005",
+    date: "2026-01-06",
+    time: "07:50",
+    driverId: "paul",
+    corporateClientId: "mi-chofer",
+    passenger: "Anto Striglio - Papa Pablo",
+    origin: "CABA - Calle Escobar",
+    destination: "YPF Bancalari",
+    kilometers: 27,
+    waitValue: 0,
+    totalAmount: 50000,
+    chargeType: "PENDIENTE",
+    paymentMethod: "PENDING",
+    sharedTrip: false,
+    status: "COMPLETED",
+    paidAt: "2026-01-29",
+    paidMethod: "MERCADO_PAGO"
+  },
+  {
+    id: "trip-0006",
+    date: "2026-01-06",
+    time: "11:20",
+    driverId: "ale",
+    corporateClientId: "mi-chofer",
+    passenger: "Berni",
+    origin: "Los sauces 163",
+    destination: "Golf 189",
+    kilometers: 5,
+    waitValue: 0,
+    totalAmount: 9000,
+    chargeType: "PENDIENTE",
+    paymentMethod: "PENDING",
+    sharedTrip: false,
+    status: "PENDING"
+  },
+  {
+    id: "trip-0007",
+    date: "2026-01-06",
+    time: "17:30",
+    driverId: "paul",
+    corporateClientId: "uber",
+    passenger: "UBER",
+    origin: "Pagos en efectivo",
+    destination: "Uber",
+    kilometers: 0,
+    waitValue: 0,
+    totalAmount: 42075,
+    chargeType: "COBRADO_EN_EL_MOMENTO",
+    paymentMethod: "CASH_UBER",
+    sharedTrip: false,
+    status: "COMPLETED"
+  },
+  {
+    id: "trip-0008",
+    date: "2026-01-08",
+    time: "08:00",
+    driverId: "paul",
+    corporateClientId: "colegio",
+    passenger: "Lucia Garibaldi y Patricio",
+    origin: "El Golf",
+    destination: "Northfields",
+    kilometers: 10,
+    waitValue: 0,
+    totalAmount: 16200,
+    chargeType: "ADELANTADO",
+    paymentMethod: "ADVANCE",
+    sharedTrip: true,
+    secondPassenger: "Anto Striglio - Papa Pablo",
+    status: "COMPLETED"
+  },
+  {
+    id: "trip-0009",
+    date: "2026-01-09",
+    time: "20:10",
+    driverId: "ivan",
+    corporateClientId: "mi-chofer",
+    passenger: "Cliente particular",
+    origin: "Nordelta",
+    destination: "Palermo",
+    kilometers: 36,
+    waitValue: 12000,
+    totalAmount: 73000,
+    chargeType: "COBRADO_EN_EL_MOMENTO",
+    paymentMethod: "POSNET",
+    sharedTrip: false,
+    status: "COMPLETED"
+  }
+];
+
+export const demoIncomes: ManualIncome[] = [
+  {
+    id: "income-0001",
+    date: "2026-01-02",
+    paymentMethod: "MERCADO_PAGO",
+    category: "Abona Saldo Pendiente",
+    currency: "ARS",
+    description: "Pago de saldo pendiente - colegio",
+    amount: 260000
+  },
+  {
+    id: "income-0002",
+    date: "2026-01-05",
+    paymentMethod: "MERCADO_PAGO",
+    category: "Abona Pago Adelantado",
+    currency: "ARS",
+    description: "Anto Striglio - Papa Pablo",
+    amount: 324000
+  },
+  {
+    id: "income-0003",
+    date: "2026-01-09",
+    paymentMethod: "CASH_MI_CHOFER",
+    category: "Conciliacion",
+    currency: "ARS",
+    description: "Ajuste de caja efectivo",
+    amount: 45000
+  }
+];
+
+export const demoExpenses: Expense[] = [
+  {
+    id: "expense-0001",
+    date: "2026-01-03",
+    paymentMethod: "MERCADO_PAGO",
+    category: "Comisiones Choferes",
+    description: "Liquidacion Paul",
+    amount: 180000,
+    currency: "ARS",
+    driverId: "paul"
+  },
+  {
+    id: "expense-0002",
+    date: "2026-01-06",
+    paymentMethod: "CASH_MI_CHOFER",
+    category: "Nafta",
+    description: "Carga combustible",
+    amount: 38000,
+    currency: "ARS"
+  },
+  {
+    id: "expense-0003",
+    date: "2026-01-07",
+    paymentMethod: "CASH_UBER",
+    category: "Peajes",
+    description: "Peajes UBER",
+    amount: 12500,
+    currency: "ARS"
+  },
+  {
+    id: "expense-0004",
+    date: "2026-01-10",
+    paymentMethod: "BANCO_GALICIA_PAUL",
+    category: "Service Auto",
+    description: "Service preventivo",
+    amount: 74000,
+    currency: "ARS"
+  }
+];

@@ -1,0 +1,18 @@
+{
+  "name": "Mi Chofer ERP",
+  "short_name": "Mi Chofer",
+  "description": "ERP financiero para empresas de choferes privados",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f8fb",
+  "theme_color": "#071033",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

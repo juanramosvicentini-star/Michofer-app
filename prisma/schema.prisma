@@ -1,0 +1,353 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  OWNER
+  ADMIN_STAFF
+  DRIVER
+}
+
+enum PaymentMethod {
+  CASH_MI_CHOFER
+  CASH_UBER
+  MERCADO_PAGO
+  POSNET
+  BANCO_GALICIA_PAUL
+  TRANSFER
+  DOLLARS
+  USDT
+  ADVANCE
+  PENDING
+  BONIFICADO
+}
+
+enum ChargeType {
+  COBRADO_EN_EL_MOMENTO
+  PENDIENTE
+  ADELANTADO
+}
+
+enum TripStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum ClientType {
+  MI_CHOFER
+  COLEGIO
+  HOTEL
+  UBER
+  CABIFY
+  PERSONAL
+}
+
+enum Currency {
+  ARS
+  USD
+  USDT
+}
+
+enum MovementDirection {
+  IN
+  OUT
+}
+
+enum MovementSourceType {
+  TRIP
+  INCOME
+  EXPENSE
+  TRANSFER
+  ADJUSTMENT
+}
+
+enum AccountMovementType {
+  DEBT
+  PAYMENT
+  CREDIT
+  CONSUMPTION
+  COMMISSION
+  ADJUSTMENT
+}
+
+enum SettlementStatus {
+  OPEN
+  PARTIAL
+  PAID
+}
+
+model UserProfile {
+  id        String   @id @db.Uuid
+  email     String   @unique
+  fullName  String?
+  role      Role     @default(ADMIN_STAFF)
+  driverId  String?
+  driver    Driver?  @relation(fields: [driverId], references: [id])
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  auditLogs AuditLog[]
+}
+
+model Driver {
+  id              String                 @id
+  name            String                 @unique
+  commissionRate  Decimal                @db.Decimal(6, 4)
+  active          Boolean                @default(true)
+  users           UserProfile[]
+  trips           Trip[]
+  expenses        Expense[]
+  settlements     DriverSettlement[]
+  settlementLines DriverSettlementLine[]
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+}
+
+model Client {
+  id                   String                   @id
+  name                 String                   @unique
+  type                 ClientType
+  commissionRate       Decimal                  @default(0) @db.Decimal(6, 4)
+  allowsAdvanceBalance Boolean                  @default(false)
+  active               Boolean                  @default(true)
+  trips                Trip[]
+  accountMovements     CurrentAccountMovement[]
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+}
+
+model FareTier {
+  id         String   @id
+  fromKm     Decimal  @db.Decimal(10, 2)
+  toKm       Decimal? @db.Decimal(10, 2)
+  pricePerKm Decimal  @db.Decimal(12, 2)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model PaymentMethodConfig {
+  id                      String        @id @default(cuid())
+  method                  PaymentMethod @unique
+  label                   String
+  cashBoxId               String?
+  cashBox                 CashBox?      @relation(fields: [cashBoxId], references: [id])
+  feeRate                 Decimal       @default(0) @db.Decimal(6, 4)
+  posnetNetFactor         Decimal?      @db.Decimal(8, 4)
+  posnetSettlementDivisor Decimal?      @db.Decimal(8, 4)
+  active                  Boolean       @default(true)
+  updatedAt               DateTime      @updatedAt
+}
+
+model Trip {
+  id               String                   @id @default(cuid())
+  date             DateTime
+  time             String
+  driverId         String
+  driver           Driver                   @relation(fields: [driverId], references: [id])
+  clientId         String
+  client           Client                   @relation(fields: [clientId], references: [id])
+  passenger        String
+  origin           String
+  destination      String
+  kilometers       Decimal                  @default(0) @db.Decimal(10, 2)
+  waitValue        Decimal                  @default(0) @db.Decimal(12, 2)
+  totalAmount      Decimal                  @db.Decimal(14, 2)
+  dollarAmount     Decimal?                 @db.Decimal(14, 2)
+  chargeType       ChargeType
+  paymentMethod    PaymentMethod
+  paidMethod       PaymentMethod?
+  sharedTrip       Boolean                  @default(false)
+  secondPassenger  String?
+  status           TripStatus               @default(PENDING)
+  paidAt           DateTime?
+  observations     String?
+  cashMovements    CashMovement[]
+  accountMovements CurrentAccountMovement[]
+  settlementLines  DriverSettlementLine[]
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  @@index([date])
+  @@index([driverId, date])
+  @@index([clientId, date])
+  @@index([status])
+}
+
+model CashBox {
+  id                   String                @id
+  name                 String
+  currency             Currency
+  active               Boolean               @default(true)
+  movements            CashMovement[]
+  paymentMethodConfigs PaymentMethodConfig[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+}
+
+model CashMovement {
+  id          String             @id @default(cuid())
+  date        DateTime
+  boxId       String
+  box         CashBox            @relation(fields: [boxId], references: [id])
+  direction   MovementDirection
+  amount      Decimal            @db.Decimal(14, 2)
+  currency    Currency           @default(ARS)
+  concept     String
+  sourceType  MovementSourceType
+  sourceId    String
+  tripId      String?
+  trip        Trip?              @relation(fields: [tripId], references: [id])
+  incomeId    String?
+  income      Income?            @relation(fields: [incomeId], references: [id])
+  expenseId   String?
+  expense     Expense?           @relation(fields: [expenseId], references: [id])
+  createdAt   DateTime           @default(now())
+
+  @@index([date])
+  @@index([boxId, date])
+  @@index([sourceType, sourceId])
+}
+
+model CurrentAccountMovement {
+  id        String              @id @default(cuid())
+  date      DateTime
+  clientId  String
+  client    Client              @relation(fields: [clientId], references: [id])
+  type      AccountMovementType
+  amount    Decimal             @db.Decimal(14, 2)
+  concept   String
+  tripId    String?
+  trip      Trip?               @relation(fields: [tripId], references: [id])
+  createdAt DateTime            @default(now())
+
+  @@index([clientId, date])
+}
+
+model DriverSettlement {
+  id           String                 @id @default(cuid())
+  driverId     String
+  driver       Driver                 @relation(fields: [driverId], references: [id])
+  weekStart    DateTime
+  weekEnd      DateTime
+  grossAmount  Decimal                @default(0) @db.Decimal(14, 2)
+  netAmount    Decimal                @default(0) @db.Decimal(14, 2)
+  driverAmount Decimal                @default(0) @db.Decimal(14, 2)
+  paidAmount   Decimal                @default(0) @db.Decimal(14, 2)
+  status       SettlementStatus       @default(OPEN)
+  lines        DriverSettlementLine[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  @@unique([driverId, weekStart])
+  @@index([weekStart, weekEnd])
+}
+
+model DriverSettlementLine {
+  id                    String           @id @default(cuid())
+  settlementId          String
+  settlement            DriverSettlement @relation(fields: [settlementId], references: [id])
+  tripId                String
+  trip                  Trip             @relation(fields: [tripId], references: [id])
+  driverId              String
+  driver                Driver           @relation(fields: [driverId], references: [id])
+  grossAmount           Decimal          @db.Decimal(14, 2)
+  netAfterCollectionFee Decimal          @db.Decimal(14, 2)
+  driverRate            Decimal          @db.Decimal(6, 4)
+  driverAmount          Decimal          @db.Decimal(14, 2)
+  companyAmount         Decimal          @db.Decimal(14, 2)
+  paymentMethod         PaymentMethod
+
+  @@unique([settlementId, tripId])
+}
+
+model ExpenseCategory {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  active   Boolean   @default(true)
+  expenses Expense[]
+}
+
+model Expense {
+  id             String          @id @default(cuid())
+  date           DateTime
+  paymentMethod  PaymentMethod
+  categoryId     String?
+  category       ExpenseCategory? @relation(fields: [categoryId], references: [id])
+  categoryName   String
+  description    String
+  amount         Decimal         @db.Decimal(14, 2)
+  currency       Currency        @default(ARS)
+  driverId       String?
+  driver         Driver?         @relation(fields: [driverId], references: [id])
+  cashMovements  CashMovement[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([date])
+  @@index([paymentMethod, date])
+}
+
+model IncomeCategory {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  active  Boolean  @default(true)
+  incomes Income[]
+}
+
+model Income {
+  id             String          @id @default(cuid())
+  date           DateTime
+  paymentMethod  PaymentMethod
+  categoryId     String?
+  category       IncomeCategory? @relation(fields: [categoryId], references: [id])
+  categoryName   String
+  description    String
+  amount         Decimal         @db.Decimal(14, 2)
+  currency       Currency        @default(ARS)
+  cashMovements  CashMovement[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([date])
+  @@index([paymentMethod, date])
+}
+
+model VehicleInstallment {
+  id          String   @id @default(cuid())
+  vehicle     String
+  dueDate     DateTime
+  amount      Decimal  @db.Decimal(14, 2)
+  paidAmount  Decimal  @default(0) @db.Decimal(14, 2)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String       @id @default(cuid())
+  userId    String?      @db.Uuid
+  user      UserProfile? @relation(fields: [userId], references: [id])
+  entity    String
+  entityId  String
+  action    String
+  metadata  Json?
+  createdAt DateTime     @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
